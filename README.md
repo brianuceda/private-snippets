@@ -17,11 +17,11 @@ This extension allows you to use custom snippets specific to each project and pr
 
 ## 📁 New Snippets Route
 
-![New Snippets Route](https://github.com/brianuceda/private-snippets/blob/main/images/path.png?raw=true)
+![New Snippets Route](https://github.com/brianuceda/private-snippets/blob/main/images/snippets-path.png?raw=true)
 
 ## 💡 Snippet Example
 
-![Snippet Example](https://github.com/brianuceda/private-snippets/blob/main/images/example-snippet.png?raw=true)
+![Snippet Example](https://github.com/brianuceda/private-snippets/blob/main/images/basic-example-snippet.png?raw=true)
 
 ## Commands
 
