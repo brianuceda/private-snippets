@@ -1,0 +1,32 @@
+{
+  "name": "private-snippets",
+  "displayName": "Private Snippets",
+  "description": "Load custom snippets from .vscode/snippets/*.json files",
+  "version": "0.1.0",
+  "publisher": "brianuceda",
+  "license": "MIT",
+	"icon": "images/private-snippets-logo.png",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/brianuceda/private-snippets"
+	},
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Snippets"
+  ],
+  "activationEvents": [
+    "onLanguage",
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "private-snippets.reload",
+        "title": "Reload Private Snippets"
+      }
+    ]
+  }
+}
