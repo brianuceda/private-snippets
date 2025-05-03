@@ -15,31 +15,13 @@ This extension allows you to use custom snippets specific to each project and pr
 2. Create JSON files for each language (for example, `javascript.json`, `python.json`)
 3. For global snippets, use `all.json`
 
-### Snippet Files Path
+## 📁 New Snippets Route
 
-```
-.
-└── .vscode/
-    └── snippets/
-        ├── all.json
-        ├── javascript.json
-        ├── python.json
-        └── ...
-```
+![New Snippets Route](https://github.com/brianuceda/private-snippets/blob/main/images/path.png?raw=true)
 
-### Snippet File Format
+## 💡 Snippet Example
 
-```json
-{
-  "Test Private Snippets": {
-    "prefix": "testps",
-    "body": [
-      "console.log('Test Private Snippets');"
-    ],
-    "description": "Private Snippet description"
-  }
-}
-```
+![Snippet Example](https://github.com/brianuceda/private-snippets/blob/main/images/example-snippet.png?raw=true)
 
 ## Commands
 

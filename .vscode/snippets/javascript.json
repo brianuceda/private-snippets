@@ -1,9 +1,9 @@
 {
-  "My Snippet": {
+  "Test Private Snippets": {
     "prefix": "testps",
     "body": [
       "console.log('Test Private Snippets');"
     ],
-    "description": "Private snippet description"
+    "description": "Private Snippet description"
   }
 }
