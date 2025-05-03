@@ -17,13 +17,14 @@ This extension allows you to use custom snippets specific to each project and pr
 
 ### Snippet Files Path
 
-```json
+```
 .
 └── .vscode/
-    ├── all.json
-    ├── javascript.json
-    ├── python.json
-    └── ...
+    └── snippets/
+        ├── all.json
+        ├── javascript.json
+        ├── python.json
+        └── ...
 ```
 
 ### Snippet File Format
