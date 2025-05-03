@@ -2,7 +2,7 @@
   "name": "private-snippets",
   "displayName": "Private Snippets",
   "description": "Load custom snippets from .vscode/snippets/*.json files",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "brianuceda",
   "license": "MIT",
 	"icon": "images/private-snippets-logo.png",

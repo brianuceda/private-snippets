@@ -79,10 +79,42 @@ function registerSnippets(context) {
                 // Only add if the prefix matches what is being written
                 if (linePrefix.endsWith(prefix) || prefix.startsWith(linePrefix.trim())) {
                   const item = new vscode.CompletionItem(prefix);
-                  item.insertText = new vscode.SnippetString(snippet.body.join('\n'));
+                  
+                  // Prepare the snippet body with imports and extra code
+                  let snippetContent = '';
+                  
+                  // Add imports if present
+                  if (snippet.imports && Array.isArray(snippet.imports) && snippet.imports.length > 0) {
+                    // Determine where to insert imports
+                    const text = document.getText();
+                    const existingImports = [];
+                    const importRegex = /^import\s+.*;$/gm;
+                    let match;
+                    
+                    while ((match = importRegex.exec(text)) !== null) {
+                      existingImports.push(match[0]);
+                    }
+                    
+                    // Add only imports that don't already exist
+                    for (const importStatement of snippet.imports) {
+                      if (!existingImports.includes(importStatement)) {
+                        snippetContent += importStatement + '\n';
+                      }
+                    }
+                  }
+                  
+                  // Add extra code if present
+                  if (snippet.extra && snippet.extra.length > 0) {
+                    snippetContent += snippet.extra.join('\n') + '\n\n';
+                  }
+                  
+                  // Add the main body
+                  snippetContent += snippet.body.join('\n');
+                  
+                  item.insertText = new vscode.SnippetString(snippetContent);
                   item.documentation = new vscode.MarkdownString(snippet.description || '');
                   item.kind = vscode.CompletionItemKind.Snippet;
-                  item.detail = `Snippet: ${key}`;
+                  item.detail = key;
                   completionItems.push(item);
                 }
               });
@@ -143,7 +175,10 @@ async function createOrUpdateSnippetFile(language) {
     }
   }
 
-  let exampleBody;
+  let exampleImports = [];
+  let exampleExtra = [];
+  let exampleBody = [];
+
   if (language === 'python') {
     exampleBody = ["print('Test')"];
   } else if (language === 'html') {
@@ -151,21 +186,25 @@ async function createOrUpdateSnippetFile(language) {
   } else if (language === 'css') {
     exampleBody = [".test {", "  color: red;", "}"];
   } else if (language === 'java') {
-    exampleBody = ["System.out.println(\"Test\");"];
+    exampleBody = ["Scanner sc = new Scanner(System.in);", "String input = sc.nextLine();", "System.out.println(input);"];
   } else if (language === 'csharp') {
+    exampleImports = ["using System;"];
     exampleBody = ["Console.WriteLine(\"Test\");"];
   } else if (language === 'cpp') {
+    exampleImports = ["#include <iostream>"];
+    exampleExtra = ["using namespace std;"];
     exampleBody = ["std::cout << \"Test\" << std::endl;"];
   } else if (language === 'php') {
     exampleBody = ["echo \"Test\";"];
   } else if (language === 'ruby') {
+    exampleImports = ["require 'json'"];
     exampleBody = ["puts \"Test\""];
   } else if (language === 'go') {
+    exampleImports = ["import \"fmt\""];
     exampleBody = ["fmt.Println(\"Test\")"];
   } else if (language === 'rust') {
+    exampleImports = ["use std::io;"];
     exampleBody = ["println!(\"Test\");"];
-  } else if (language === 'swift') {
-    exampleBody = ["print(\"Test\")"];
   } else if (language === 'typescript') {
     exampleBody = ["console.log('Test');"];
   } else {
@@ -175,10 +214,28 @@ async function createOrUpdateSnippetFile(language) {
   const testSnippet = {
     "Test": {
       "prefix": "test",
-      "body": exampleBody,
       "description": "Test"
     }
   };
+
+  // Add imports and extra if applicable
+  if (exampleImports.length > 0) {
+    testSnippet.Test.imports = exampleImports;
+  } else {
+    testSnippet.Test.imports = exampleImports;
+  }
+  
+  if (exampleExtra.length > 0) {
+    testSnippet.Test.extra = exampleExtra;
+  } else {
+    testSnippet.Test.extra = exampleExtra;
+  }
+
+  if (exampleBody.length > 0) {
+    testSnippet.Test.body = exampleBody;
+  }  else {
+    testSnippet.Test.body = exampleBody;
+  }
 
   let newContent;
   if (fileExists && Object.keys(existingContent).length > 0) {
