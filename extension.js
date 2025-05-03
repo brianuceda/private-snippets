@@ -2,61 +2,117 @@ const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
 
-// Create example snippet files if they don't exist
-function createExampleSnippetFiles() {
+// Create snippets directory if it doesn't exist
+function createSnippetsDirectory() {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) {
-    vscode.window.showWarningMessage('No workspace folder open. Cannot create example snippet files.');
+    vscode.window.showWarningMessage('No workspace folder open. Cannot create snippets directory.');
     return;
   }
 
   const snippetsDir = path.join(workspaceFolders[0].uri.fsPath, '.vscode', 'snippets');
   
-  // Create snippets directory if it doesn't exist
   if (!fs.existsSync(snippetsDir)) {
     try {
       fs.mkdirSync(snippetsDir, { recursive: true });
       vscode.window.showInformationMessage('Created snippets directory: ' + snippetsDir);
     } catch (error) {
       vscode.window.showErrorMessage(`Error creating snippets directory: ${error.message}`);
-      return;
+    }
+  }
+  
+  return snippetsDir;
+}
+
+// Register snippets from JSON files in .vscode/snippets/
+function registerSnippets(context) {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) return;
+
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders) return;
+
+  const currentLanguage = editor.document.languageId;
+
+  for (const subscription of context.subscriptions) {
+    if (subscription.dispose && subscription._isSnippetProvider) {
+      subscription.dispose();
     }
   }
 
-  // Create all.json with test snippet if it doesn't exist
-  const allJsonPath = path.join(snippetsDir, 'all.json');
-  if (!fs.existsSync(allJsonPath)) {
-    const allSnippetsContent = `{
-    "Test": {
-      "prefix": "test",
-      "body": [
-        "console.log('Test');"
-      ],
-      "description": "Test"
-    }
-  }`;
+  for (const folder of workspaceFolders) {
+    const snippetsDir = path.join(folder.uri.fsPath, '.vscode', 'snippets');
     
     try {
-      fs.writeFileSync(allJsonPath, allSnippetsContent);
-      vscode.window.showInformationMessage('Created example all.json snippet file');
-    } catch (error) {
-      vscode.window.showErrorMessage(`Error creating all.json: ${error.message}`);
-    }
-  }
+      if (!fs.existsSync(snippetsDir)) {
+        fs.mkdirSync(snippetsDir, { recursive: true });
+        vscode.window.showInformationMessage(`Directorio de snippets creado: ${snippetsDir}`);
+        continue;
+      }
 
-  // Create javascript.json if it doesn't exist (empty file)
-  const jsJsonPath = path.join(snippetsDir, 'javascript.json');
-  if (!fs.existsSync(jsJsonPath)) {
-    try {
-      fs.writeFileSync(jsJsonPath, '');
-      vscode.window.showInformationMessage('Created empty javascript.json snippet file');
-    } catch (error) {
-      vscode.window.showErrorMessage(`Error creating javascript.json: ${error.message}`);
+      const files = fs.readdirSync(snippetsDir);
+      
+      for (const file of files) {
+        if (!file.endsWith('.json')) continue;
+        
+        const filePath = path.join(snippetsDir, file);
+        const langId = file.replace('.json', '');
+
+        if (langId !== 'all' && langId !== currentLanguage) continue;
+
+        try {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          if (!content.trim()) continue;
+          
+          const snippets = JSON.parse(content);
+          
+          // Create a completion provider for all snippets in this file
+          const provider = {
+            provideCompletionItems(document, position) {
+              const linePrefix = document.lineAt(position).text.substr(0, position.character);
+              const completionItems = [];
+
+              Object.keys(snippets).forEach(key => {
+                const snippet = snippets[key];
+                const prefix = snippet.prefix;
+                
+                // Only add if the prefix matches what is being written
+                if (linePrefix.endsWith(prefix) || prefix.startsWith(linePrefix.trim())) {
+                  const item = new vscode.CompletionItem(prefix);
+                  item.insertText = new vscode.SnippetString(snippet.body.join('\n'));
+                  item.documentation = new vscode.MarkdownString(snippet.description || '');
+                  item.kind = vscode.CompletionItemKind.Snippet;
+                  item.detail = `Snippet: ${key}`;
+                  completionItems.push(item);
+                }
+              });
+              
+              return completionItems;
+            }
+          };
+          
+          // Register for all characters, not just the exact prefix
+          const subscription = vscode.languages.registerCompletionItemProvider(
+            { language: currentLanguage },
+            provider,
+            ...'.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'.split('')
+          );
+          
+          subscription._isSnippetProvider = true;
+          context.subscriptions.push(subscription);
+          
+          vscode.window.showInformationMessage(`Snippets loaded from ${file}`);
+        } catch (err) {
+          vscode.window.showErrorMessage(`Error loading snippets from ${file}: ${err.message}`);
+        }
+      }
+    } catch (err) {
+      vscode.window.showErrorMessage(`Error accessing snippets directory: ${err.message}`);
     }
   }
 }
 
-// Create a new snippet file or add to existing one
+// Create a new snippet file or add to an existing one
 async function createOrUpdateSnippetFile(language) {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) {
@@ -66,7 +122,6 @@ async function createOrUpdateSnippetFile(language) {
 
   const snippetsDir = path.join(workspaceFolders[0].uri.fsPath, '.vscode', 'snippets');
   
-  // Create snippets directory if it doesn't exist
   if (!fs.existsSync(snippetsDir)) {
     fs.mkdirSync(snippetsDir, { recursive: true });
   }
@@ -75,7 +130,6 @@ async function createOrUpdateSnippetFile(language) {
   let existingContent = {};
   let fileExists = false;
 
-  // Check if file exists and read its content
   if (fs.existsSync(snippetFilePath)) {
     fileExists = true;
     try {
@@ -89,7 +143,6 @@ async function createOrUpdateSnippetFile(language) {
     }
   }
 
-  // Create example snippet based on language
   let exampleBody;
   if (language === 'python') {
     exampleBody = ["print('Test')"];
@@ -127,7 +180,6 @@ async function createOrUpdateSnippetFile(language) {
     }
   };
 
-  // Merge with existing content or use new content
   let newContent;
   if (fileExists && Object.keys(existingContent).length > 0) {
     newContent = { ...existingContent, ...testSnippet };
@@ -135,12 +187,10 @@ async function createOrUpdateSnippetFile(language) {
     newContent = testSnippet;
   }
 
-  // Write back to file
   try {
     fs.writeFileSync(snippetFilePath, JSON.stringify(newContent, null, 2));
     vscode.window.showInformationMessage(`Snippet added to ${language}.json`);
     
-    // Open the snippet file in the editor
     const document = await vscode.workspace.openTextDocument(snippetFilePath);
     await vscode.window.showTextDocument(document);
   } catch (error) {
@@ -148,9 +198,8 @@ async function createOrUpdateSnippetFile(language) {
   }
 }
 
-// Get list of available language IDs
+// Get list of available languages
 function getLanguageOptions() {
-  // Common languages as quickpicks
   const commonLanguages = [
     { label: 'Custom...', description: 'Enter a custom language ID' },
     { label: 'javascript', description: 'JavaScript' },
@@ -171,7 +220,6 @@ function getLanguageOptions() {
 
 // Command to add a new snippet
 async function addNewSnippet() {
-  // Show language selection quickpick
   const languageOptions = getLanguageOptions();
   
   const selectedLanguage = await vscode.window.showQuickPick(languageOptions, {
@@ -195,15 +243,64 @@ async function addNewSnippet() {
   await createOrUpdateSnippetFile(languageId);
 }
 
+// Configure file watcher for snippets directory
+function setupFileWatcher(context) {
+  const workspaceFolders = vscode.workspace.workspaceFolders;
+  if (!workspaceFolders) return;
+  
+  const snippetsDir = path.join(workspaceFolders[0].uri.fsPath, '.vscode', 'snippets');
+  
+  if (!fs.existsSync(snippetsDir)) {
+    fs.mkdirSync(snippetsDir, { recursive: true });
+  }
+  
+  const watcher = vscode.workspace.createFileSystemWatcher(
+    new vscode.RelativePattern(workspaceFolders[0], '.vscode/snippets/**/*.json')
+  );
+  
+  watcher.onDidChange(() => {
+    registerSnippets(context);
+    vscode.window.showInformationMessage('Snippets reloaded due to file changes');
+  });
+  
+  watcher.onDidCreate(() => {
+    registerSnippets(context);
+    vscode.window.showInformationMessage('New snippet file detected, snippets reloaded');
+  });
+  
+  watcher.onDidDelete(() => {
+    registerSnippets(context);
+    vscode.window.showInformationMessage('Snippet file deleted, snippets reloaded');
+  });
+  
+  context.subscriptions.push(watcher);
+}
+
+// Activate the extension
 function activate(context) {
   console.log('Extension Private Snippets is now active');
   
+  createSnippetsDirectory();
+  
+  let reloadDisposable = vscode.commands.registerCommand('private-snippets.reload', () => {
+    registerSnippets(context);
+    vscode.window.showInformationMessage('Private Snippets recargados');
+  });
+  context.subscriptions.push(reloadDisposable);
+    
   let addSnippetDisposable = vscode.commands.registerCommand('private-snippets.addSnippet', addNewSnippet);
   context.subscriptions.push(addSnippetDisposable);
 
-  createExampleSnippetFiles();
+  registerSnippets(context);
+
+  setupFileWatcher(context);
+  
+  vscode.window.onDidChangeActiveTextEditor(() => {
+    registerSnippets(context);
+  }, null, context.subscriptions);
 }
 
+// Deactivate the extension
 function deactivate() {}
 
 module.exports = {
