@@ -2,7 +2,7 @@
   "name": "private-snippets",
   "displayName": "Private Snippets",
   "description": "Load custom snippets from .vscode/snippets/*.json files",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "brianuceda",
   "license": "MIT",
 	"icon": "images/private-snippets-logo.png",
@@ -24,8 +24,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "private-snippets.reload",
-        "title": "Reload Private Snippets"
+        "command": "private-snippets.addSnippet",
+        "title": "Add New Snippet"
       }
     ]
   }

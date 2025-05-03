@@ -1,0 +1,10 @@
+{
+    "Test": {
+      "prefix": "test",
+      "body": [
+        "console.log('Test');"
+      ],
+      "description": "Test"
+    }
+  }
+  
