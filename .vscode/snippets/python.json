@@ -1,0 +1,59 @@
+{
+  "Scanner": {
+    "prefix": "sc",
+    "description": "Scanner object",
+    "body": [
+      "import sys\n",
+      "input = sys.stdin.read()"
+    ]
+  },
+  "Random": {
+    "prefix": "rd",
+    "description": "Random object",
+    "body": [
+      "import random\n",
+      "x = random.randint(0, 99)"
+    ]
+  },
+  "List": {
+    "prefix": "ls",
+    "description": "List object",
+    "body": [
+      "my_list = []"
+    ]
+  },
+  "Map": {
+    "prefix": "mp",
+    "description": "Map object",
+    "body": [
+      "my_map = {}"
+    ]
+  },
+  "Set": {
+    "prefix": "st",
+    "description": "Set object",
+    "body": [
+      "my_set = set()"
+    ]
+  },
+  "Optional": {
+    "prefix": "op",
+    "description": "Optional object",
+    "body": [
+      "from typing import Optional\n",
+      "optional: Optional[object] = None"
+    ]
+  },
+  "Thread": {
+    "prefix": "thread",
+    "description": "Thread object",
+    "body": [
+      "import threading\n",
+      "def run():",
+      "\t# Code",
+      "\tpass\n",
+      "thread = threading.Thread(target=run)",
+      "thread.start()"
+    ]
+  }
+}

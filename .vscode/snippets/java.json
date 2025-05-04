@@ -1,0 +1,54 @@
+{
+  "Scanner": {
+    "prefix": "sc",
+    "description": "Scanner object",
+    "body": [
+      "Scanner ${1:sc} = new Scanner(System.in);"
+    ]
+  },
+  "Random": {
+    "prefix": "rd",
+    "description": "Random object",
+    "body": [
+      "int ${1:x} = new Random().nextInt(${2:100});"
+    ]
+  },
+  "List": {
+    "prefix": "ls",
+    "description": "List object",
+    "body": [
+      "List<${1:Object}> ${2:list} = new ArrayList<>();"
+    ]
+  },
+  "Map": {
+    "prefix": "mp",
+    "description": "Map object",
+    "body": [
+      "Map<${1:Object}, ${2:Object}> ${3:map} = new HashMap<>();"
+    ]
+  },
+  "Set": {
+    "prefix": "st",
+    "description": "Set object",
+    "body": [
+      "Set<${1:Object}> ${2:set} = new HashSet<>();"
+    ]
+  },
+  "Optional": {
+    "prefix": "op",
+    "description": "Optional object",
+    "body": [
+      "Optional<${1:Object}> ${2:optional} = Optional.empty();"
+    ]
+  },
+  "Thread": {
+    "prefix": "thread",
+    "description": "Thread object",
+    "body": [
+      "Thread ${1:thread} = new Thread(() -> {",
+      "\t${2:// Code}",
+      "});",
+      "thread.start();"
+    ]
+  }
+}
