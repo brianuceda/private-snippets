@@ -105,8 +105,6 @@ function registerSnippets(context) {
           
           subscription._isSnippetProvider = true;
           context.subscriptions.push(subscription);
-          
-          vscode.window.showInformationMessage(`Snippets loaded from ${file}`);
         } catch (err) {
           vscode.window.showErrorMessage(`Error loading snippets from ${file}: ${err.message}`);
         }
