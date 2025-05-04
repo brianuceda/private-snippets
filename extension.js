@@ -179,11 +179,14 @@ async function createOrUpdateSnippetFile(language) {
     case 'rust':
       exampleBody = ["println!(\"Test\");"];
       break;
+    case 'javascript':
+      exampleBody = ["console.log('Test')"];
+      break;
     case 'typescript':
-      exampleBody = ["console.log('Test');"];
+      exampleBody = ["console.log('Test')"];
       break;
     default:
-      exampleBody = ["console.log('Test');"];
+      exampleBody = ["test"];
       break;
   }
 
@@ -300,7 +303,7 @@ function activate(context) {
   
   let reloadDisposable = vscode.commands.registerCommand('private-snippets.reload', () => {
     registerSnippets(context);
-    vscode.window.showInformationMessage('Private Snippets recargados');
+    vscode.window.showInformationMessage('Private Snippets reloaded');
   });
   context.subscriptions.push(reloadDisposable);
     
