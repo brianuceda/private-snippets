@@ -1,11 +1,11 @@
+
 {
   "Test": {
     "prefix": "test",
     "description": "Test",
-    "imports": [],
-    "extra": [],
     "body": [
       "console.log('Test');"
     ]
   }
 }
+

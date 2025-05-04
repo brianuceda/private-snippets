@@ -80,38 +80,11 @@ function registerSnippets(context) {
                 if (linePrefix.endsWith(prefix) || prefix.startsWith(linePrefix.trim())) {
                   const item = new vscode.CompletionItem(prefix);
                   
-                  // Prepare the snippet body with imports and extra code
-                  let snippetContent = '';
-                  
-                  // Add imports if present
-                  if (snippet.imports && Array.isArray(snippet.imports) && snippet.imports.length > 0) {
-                    // Determine where to insert imports
-                    const text = document.getText();
-                    const existingImports = [];
-                    const importRegex = /^import\s+.*;$/gm;
-                    let match;
-                    
-                    while ((match = importRegex.exec(text)) !== null) {
-                      existingImports.push(match[0]);
-                    }
-                    
-                    // Add only imports that don't already exist
-                    for (const importStatement of snippet.imports) {
-                      if (!existingImports.includes(importStatement)) {
-                        snippetContent += importStatement + '\n';
-                      }
-                    }
+                  // Create snippet string from body
+                  if (snippet.body && Array.isArray(snippet.body)) {
+                    item.insertText = new vscode.SnippetString(snippet.body.join('\n'));
                   }
                   
-                  // Add extra code if present
-                  if (snippet.extra && snippet.extra.length > 0) {
-                    snippetContent += snippet.extra.join('\n') + '\n\n';
-                  }
-                  
-                  // Add the main body
-                  snippetContent += snippet.body.join('\n');
-                  
-                  item.insertText = new vscode.SnippetString(snippetContent);
                   item.documentation = new vscode.MarkdownString(snippet.description || '');
                   item.kind = vscode.CompletionItemKind.Snippet;
                   item.detail = key;
@@ -175,67 +148,54 @@ async function createOrUpdateSnippetFile(language) {
     }
   }
 
-  let exampleImports = [];
-  let exampleExtra = [];
   let exampleBody = [];
 
-  if (language === 'python') {
-    exampleBody = ["print('Test')"];
-  } else if (language === 'html') {
-    exampleBody = ["<div>Test</div>"];
-  } else if (language === 'css') {
-    exampleBody = [".test {", "  color: red;", "}"];
-  } else if (language === 'java') {
-    exampleBody = ["Scanner sc = new Scanner(System.in);", "String input = sc.nextLine();", "System.out.println(input);"];
-  } else if (language === 'csharp') {
-    exampleImports = ["using System;"];
-    exampleBody = ["Console.WriteLine(\"Test\");"];
-  } else if (language === 'cpp') {
-    exampleImports = ["#include <iostream>"];
-    exampleExtra = ["using namespace std;"];
-    exampleBody = ["std::cout << \"Test\" << std::endl;"];
-  } else if (language === 'php') {
-    exampleBody = ["echo \"Test\";"];
-  } else if (language === 'ruby') {
-    exampleImports = ["require 'json'"];
-    exampleBody = ["puts \"Test\""];
-  } else if (language === 'go') {
-    exampleImports = ["import \"fmt\""];
-    exampleBody = ["fmt.Println(\"Test\")"];
-  } else if (language === 'rust') {
-    exampleImports = ["use std::io;"];
-    exampleBody = ["println!(\"Test\");"];
-  } else if (language === 'typescript') {
-    exampleBody = ["console.log('Test');"];
-  } else {
-    exampleBody = ["console.log('Test');"];
+  switch (language) {
+    case 'python':
+      exampleBody = ["print('Test')"];
+      break;
+    case 'html':
+      exampleBody = ["<div></div>"];
+      break;
+    case 'css':
+      exampleBody = [".test {", "  color: red;", "}"];
+      break;
+    case 'java':
+      exampleBody = ["System.out.println(\"Test\");"];
+      break;
+    case 'csharp':
+      exampleBody = ["Console.WriteLine(\"Test\");"];
+      break;
+    case 'cpp':
+      exampleBody = ["std::cout << \"Test\" << std::endl;"];
+      break;
+    case 'php':
+      exampleBody = ["echo \"Test\";"];
+      break;
+    case 'ruby':
+      exampleBody = ["puts \"Test\""];
+      break;
+    case 'go':
+      exampleBody = ["fmt.Println(\"Test\")"];
+      break;
+    case 'rust':
+      exampleBody = ["println!(\"Test\");"];
+      break;
+    case 'typescript':
+      exampleBody = ["console.log('Test');"];
+      break;
+    default:
+      exampleBody = ["console.log('Test');"];
+      break;
   }
 
   const testSnippet = {
     "Test": {
       "prefix": "test",
-      "description": "Test"
+      "description": "Test",
+      "body": exampleBody
     }
   };
-
-  // Add imports and extra if applicable
-  if (exampleImports.length > 0) {
-    testSnippet.Test.imports = exampleImports;
-  } else {
-    testSnippet.Test.imports = exampleImports;
-  }
-  
-  if (exampleExtra.length > 0) {
-    testSnippet.Test.extra = exampleExtra;
-  } else {
-    testSnippet.Test.extra = exampleExtra;
-  }
-
-  if (exampleBody.length > 0) {
-    testSnippet.Test.body = exampleBody;
-  }  else {
-    testSnippet.Test.body = exampleBody;
-  }
 
   let newContent;
   if (fileExists && Object.keys(existingContent).length > 0) {
@@ -259,6 +219,7 @@ async function createOrUpdateSnippetFile(language) {
 function getLanguageOptions() {
   const commonLanguages = [
     { label: 'Custom...', description: 'Enter a custom language ID' },
+    { label: 'all', description: 'Global snippets for all languages' },
     { label: 'javascript', description: 'JavaScript' },
     { label: 'typescript', description: 'TypeScript' },
     { label: 'python', description: 'Python' },
